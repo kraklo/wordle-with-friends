@@ -1,25 +1,35 @@
-import logo from './logo.svg';
 import './App.css';
 
-function App() {
+function RenderBox() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="box"></div>
+  );
+}
+
+function RenderBoxRow() {
+  const boxes = [];
+  for (let i = 0; i < 5; i++) {
+    boxes.push(RenderBox());
+  }
+
+  return (
+    <div className="row">
+      {boxes}
     </div>
   );
+}
+
+function RenderAllBoxRows() {
+  const rows = [];
+  for (let i = 0; i < 6; i++) {
+    rows.push(RenderBoxRow());
+  }
+
+  return rows;
+}
+
+function App() {
+  return RenderAllBoxRows();
 }
 
 export default App;
