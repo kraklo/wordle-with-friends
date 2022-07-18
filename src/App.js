@@ -47,14 +47,16 @@ function SetForm(props) {
   );
 }
 
-function displayWord(word, winCondition) {
+function displayWord(word, winCondition, loseCondition) {
   if (winCondition) {
     return (
       <>Correct! The word was <em>{word}</em>!</>
     );
-  }
-
-  if (word === '') {
+  } else if (loseCondition) {
+    return (
+      <>Uh oh, you ran out of guesses! The word was <em>{word}</em>!</>
+    );
+  } else if (word === '') {
     return "There is no word set"
   } else if (word.length !== 5) {
     return "Please set a five letter word"
@@ -178,6 +180,7 @@ function App() {
   const [row, setRow] = useState(0);
   const [column, setColumn] = useState(0);
   const [winCondition, setWinCondition] = useState(false);
+  const [loseCondition, setLoseCondition] = useState(false);
   const inputRef = useRef(null);
 
   const changeBox = (box, rowNum, colNum) => {
@@ -196,7 +199,7 @@ function App() {
   }
 
   const handleKey = event => {
-    if (winCondition) {
+    if (winCondition || loseCondition) {
       return;
     }
 
@@ -220,9 +223,12 @@ function App() {
 
       newBoxes.forEach((box, i) => changeBox(box, row, i));
 
-      const newRow = row >= 5 ? 0 : row + 1;
-      setRow(newRow);
-      setColumn(0);
+      if (row >= 5) {
+        setLoseCondition(true);
+      } else {
+        setRow(row + 1);
+        setColumn(0);
+      }
     } else if (event.key === "Backspace") {
       const newBox = {
         letter: '',
@@ -251,7 +257,7 @@ function App() {
 
   return (
     <>
-      <p>{displayWord(word, winCondition)}</p>
+      <p>{displayWord(word, winCondition, loseCondition)}</p>
       <SetForm
         settableState={settableState}
         inputRef={inputRef}
