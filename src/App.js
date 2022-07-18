@@ -125,26 +125,35 @@ function App() {
   };
 
   function handleKey(event) {
-    if (!word || !inAlphabet(event.key)) {
+
+    if (!word) {
       return;
-    }
-
-    const newBox = {
-      letter: event.key.toUpperCase(),
-      colour: "unnused"
-    }
-
-    console.log("Row: " + row);
-    console.log("Column: " + column);
-
-    changeBox(newBox, row, column);
-
-    if (column >= 4) {
+    } else if (event.key === "Enter" && column > 4) {
       const newRow = row >= 5 ? 0 : row + 1;
 
       setRow(newRow);
       setColumn(0);
+    } else if (event.key === "Backspace") {
+      const newBox = {
+        letter: '',
+        colour: "unnused"
+      };
+
+      const newColumn = column > 0 ? column - 1 : 0;
+
+      changeBox(newBox, row, newColumn);
+      setColumn(newColumn);
     } else {
+      if (!inAlphabet(event.key) || column > 4) {
+        return;
+      }
+
+      const newBox = {
+        letter: event.key.toUpperCase(),
+        colour: "unnused"
+      };
+
+      changeBox(newBox, row, column);
       setColumn(column + 1);
     }
   }
