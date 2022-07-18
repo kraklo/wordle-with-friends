@@ -1,7 +1,7 @@
 import './App.css';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
-function createBox(x, y) {
+function createBox() {
   return {
     letter: '',
     colour: 'unnused'
@@ -60,7 +60,7 @@ function renderBox(box, rowNum, colNum, changeBox) {
   const colour = "box " + box.colour;
 
   return (
-    <div key={colNum} className={colour} onClick={() => changeBox({ letter: "A", colour: "correct" }, rowNum, colNum)}>
+    <div key={colNum} className={colour}>
       <p className="letter">{box.letter}</p>
     </div>
   )
@@ -86,19 +86,64 @@ function renderBoxes(boxes, changeBox) {
   return boxRows;
 }
 
+const useEventListener = (eventName, handler, element = window) => {
+  const savedHandler = useRef();
+
+  useEffect(() => {
+    savedHandler.current = handler;
+  }, [handler]);
+
+  useEffect(() => {
+    const eventListener = (event) => savedHandler.current(event);
+    element.addEventListener(eventName, eventListener);
+    return () => {
+      element.removeEventListener(eventName, eventListener);
+    };
+  }, [eventName, element]);
+};
+
 function App() {
   const [word, setWord] = useState('');
   const [settableState, setSettableState] = useState(true);
   const [boxes, setBoxes] = useState(createAllBoxRows());
+  const [row, setRow] = useState(0);
+  const [column, setColumn] = useState(0);
   const inputRef = useRef(null);
 
-  const changeBox = function (box, rowNum, colNum) {
+  const changeBox = (box, rowNum, colNum) => {
     const boxesCopy = boxes.slice();
 
     boxesCopy[rowNum][colNum] = box;
 
     setBoxes(boxesCopy);
+  };
+
+  function handleKey(event) {
+    if (!word) {
+      return;
+    }
+
+    const newBox = {
+      letter: event.key,
+      colour: "unnused"
+    }
+
+    console.log("Row: " + row);
+    console.log("Column: " + column);
+
+    changeBox(newBox, row, column);
+
+    if (column >= 4) {
+      const newRow = row >= 5 ? 0 : row + 1;
+
+      setRow(newRow);
+      setColumn(0);
+    } else {
+      setColumn(column + 1);
+    }
   }
+
+  useEventListener("keydown", handleKey);
 
   return (
     <>
