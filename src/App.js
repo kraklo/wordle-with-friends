@@ -124,7 +124,7 @@ function App() {
     setBoxes(boxesCopy);
   };
 
-  function handleKey(event) {
+  const handleKey = (event) => {
 
     if (!word) {
       return;
