@@ -1,7 +1,9 @@
 import './App.css';
 import React, { useState, useRef, useEffect } from 'react';
+import { dictionary } from './dictionary.js';
 
 const alphabet = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"];
+console.log(dictionary);
 
 function inAlphabet(character) {
   return alphabet.includes(character);
@@ -50,6 +52,8 @@ function displayWord(word) {
     return "There is no word set"
   } else if (word.length !== 5) {
     return "Please set a five letter word"
+  } else if (!dictionary.length5.includes(word)) {
+    return `${word} is not a valid English word`;
   } else {
     return `The current word is ${word}`;
   }
@@ -181,19 +185,23 @@ function App() {
 
   const handleSetWord = newWord => {
     setWord(newWord.toLowerCase());
-    if (newWord.length === 5 && settableState) {
+    if (newWord.length === 5 && dictionary.length5.includes(newWord) && settableState) {
       setSettableState(false);
     }
   }
 
   const handleKey = event => {
-    if (word.length !== 5) {
+    if (settableState) {
       if (event.key === "Enter") {
         handleSetWord(inputRef.current.value);
       }
     } else if (event.key === "Enter" && column > 4) {
       const guess = getRowWord(boxes[row]);
-      console.log(guess);
+
+      if (!dictionary.length5.includes(guess)) {
+        return;
+      }
+
       const successArray = checkGuess(guess, word);
       const newBoxes = checkedGuessBoxes(boxes[row], successArray);
 
