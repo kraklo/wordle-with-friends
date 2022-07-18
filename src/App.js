@@ -10,7 +10,7 @@ function inAlphabet(character) {
 function createBox() {
   return {
     letter: '',
-    colour: 'unnused'
+    colour: 'unused'
   };
 }
 
@@ -33,13 +33,6 @@ function createAllBoxRows() {
 }
 
 function SetForm(props) {
-  function handleSetWord(word) {
-    props.setWord(word);
-    if (word.length === 5 && props.settableState) {
-      props.setSettableState(false);
-    }
-  }
-
   if (!props.settableState) {
     return null;
   }
@@ -47,7 +40,7 @@ function SetForm(props) {
   return (
     <>
       <input type="text" ref={props.inputRef} />
-      <button onClick={() => handleSetWord(props.inputRef.current.value)}>Set</button>
+      <button onClick={() => props.handleSetWord(props.inputRef.current.value)}>Set</button>
     </>
   );
 }
@@ -62,37 +55,38 @@ function displayWord(word) {
   }
 }
 
-function renderBox(box, rowNum, colNum, changeBox) {
-  const colour = "box " + box.colour;
+function renderBox(box, colNum) {
+  let classes = "box " + box.colour;
+  classes = box.colour !== "unused" ? classes + " used" : classes;
 
   return (
-    <div key={colNum} className={colour}>
+    <div key={colNum} className={classes}>
       <p className="letter">{box.letter}</p>
     </div>
   )
 }
 
-function renderBoxRow(row, rowNum, changeBox) {
+function renderBoxRow(row, rowNum) {
   const boxes = [];
 
-  row.forEach((box, colNum) => boxes.push(renderBox(box, rowNum, colNum, changeBox)));
+  row.forEach((box, colNum) => boxes.push(renderBox(box, colNum)));
 
   return (
     <div key={rowNum} className="row">{boxes}</div>
   );
 }
 
-function renderBoxes(boxes, changeBox) {
+function renderBoxes(boxes) {
   const boxRows = []
 
   boxes.forEach((boxRow, rowNum) => {
-    boxRows.push(renderBoxRow(boxRow, rowNum, changeBox))
+    boxRows.push(renderBoxRow(boxRow, rowNum))
   });
 
   return boxRows;
 }
 
-const useEventListener = (eventName, handler, element = document) => {
+function useEventListener(eventName, handler, element = document) {
   const savedHandler = useRef();
 
   useEffect(() => {
@@ -107,6 +101,67 @@ const useEventListener = (eventName, handler, element = document) => {
     };
   }, [eventName, element]);
 };
+
+function checkGuess(guess, word) {
+  const successArray = new Array(guess.length).fill(0);
+  const guessArr = [...guess];
+  const wordArr = [...word];
+  const wordFreq = {};
+  const guessFreq = {};
+
+  wordArr.forEach(letter => wordFreq[letter] = wordFreq[letter] ? wordFreq[letter] + 1 : 1);
+
+  guessArr.forEach((letter, i) => {
+    if (letter === wordArr[i]) {
+      successArray[i] = 2;
+    } else if (wordArr.includes(letter) && (!guessFreq[letter] || guessFreq[letter] < wordFreq[letter])) {
+      successArray[i] = 1;
+    }
+
+    guessFreq[letter] = guessFreq[letter] ? guessFreq[letter] + 1 : 1;
+  });
+
+  return successArray;
+}
+
+function checkedGuessBoxes(boxes, successArray) {
+  const newBoxes = [];
+  successArray.forEach((success, i) => {
+    let colour;
+
+    switch (success) {
+      case 0:
+        colour = "incorrect";
+        break;
+      case 1:
+        colour = "almost";
+        break;
+      case 2:
+        colour = "correct";
+        break;
+      default:
+        colour = "unused";
+        break;
+    }
+
+    const newBox = {
+      letter: boxes[i].letter,
+      colour: colour
+    }
+
+    newBoxes.push(newBox);
+  });
+
+  return newBoxes;
+}
+
+function getRowWord(row) {
+  let guess = "";
+
+  row.forEach((box) => guess += box.letter);
+
+  return guess.toLowerCase();
+}
 
 function App() {
   const [word, setWord] = useState('');
@@ -124,21 +179,34 @@ function App() {
     setBoxes(boxesCopy);
   };
 
-  const handleKey = (event) => {
+  const handleSetWord = newWord => {
+    setWord(newWord.toLowerCase());
+    if (newWord.length === 5 && settableState) {
+      setSettableState(false);
+    }
+  }
 
-    if (!word) {
-      return;
+  const handleKey = event => {
+    if (word.length !== 5) {
+      if (event.key === "Enter") {
+        handleSetWord(inputRef.current.value);
+      }
     } else if (event.key === "Enter" && column > 4) {
-      const newRow = row >= 5 ? 0 : row + 1;
+      const guess = getRowWord(boxes[row]);
+      console.log(guess);
+      const successArray = checkGuess(guess, word);
+      const newBoxes = checkedGuessBoxes(boxes[row], successArray);
 
+      newBoxes.forEach((box, i) => changeBox(box, row, i));
+
+      const newRow = row >= 5 ? 0 : row + 1;
       setRow(newRow);
       setColumn(0);
     } else if (event.key === "Backspace") {
       const newBox = {
         letter: '',
-        colour: "unnused"
+        colour: "unused"
       };
-
       const newColumn = column > 0 ? column - 1 : 0;
 
       changeBox(newBox, row, newColumn);
@@ -150,7 +218,7 @@ function App() {
 
       const newBox = {
         letter: event.key.toUpperCase(),
-        colour: "unnused"
+        colour: "unused"
       };
 
       changeBox(newBox, row, column);
@@ -165,11 +233,10 @@ function App() {
       <p>{displayWord(word)}</p>
       <SetForm
         settableState={settableState}
-        setSettableState={setSettableState}
-        setWord={setWord}
         inputRef={inputRef}
+        handleSetWord={handleSetWord}
       />
-      {renderBoxes(boxes, changeBox)}
+      {renderBoxes(boxes)}
     </>
   );
 }

@@ -25,8 +25,12 @@
   background-color: #787c7e;
 }
 
-.unnused {
+.unused {
   background-color: white;
+}
+
+.used {
+  color: white;
 }
 
 .letter {
