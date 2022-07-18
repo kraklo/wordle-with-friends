@@ -47,15 +47,19 @@ function SetForm(props) {
   );
 }
 
-function displayWord(word) {
+function displayWord(word, winCondition) {
+  if (winCondition) {
+    return (
+      <>Correct! The word was <em>{word}</em>!</>
+    );
+  }
+
   if (word === '') {
     return "There is no word set"
   } else if (word.length !== 5) {
     return "Please set a five letter word"
   } else if (!dictionary.length5.includes(word)) {
     return `${word} is not a valid English word`;
-  } else {
-    return `The current word is ${word}`;
   }
 }
 
@@ -173,6 +177,7 @@ function App() {
   const [boxes, setBoxes] = useState(createAllBoxRows());
   const [row, setRow] = useState(0);
   const [column, setColumn] = useState(0);
+  const [winCondition, setWinCondition] = useState(false);
   const inputRef = useRef(null);
 
   const changeBox = (box, rowNum, colNum) => {
@@ -191,6 +196,10 @@ function App() {
   }
 
   const handleKey = event => {
+    if (winCondition) {
+      return;
+    }
+
     if (settableState) {
       if (event.key === "Enter") {
         handleSetWord(inputRef.current.value);
@@ -200,6 +209,10 @@ function App() {
 
       if (!dictionary.length5.includes(guess)) {
         return;
+      }
+
+      if (guess === word) {
+        setWinCondition(true);
       }
 
       const successArray = checkGuess(guess, word);
@@ -238,7 +251,7 @@ function App() {
 
   return (
     <>
-      <p>{displayWord(word)}</p>
+      <p>{displayWord(word, winCondition)}</p>
       <SetForm
         settableState={settableState}
         inputRef={inputRef}
