@@ -1,6 +1,12 @@
 import './App.css';
 import React, { useState, useRef, useEffect } from 'react';
 
+const alphabet = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"];
+
+function inAlphabet(character) {
+  return alphabet.includes(character);
+}
+
 function createBox() {
   return {
     letter: '',
@@ -86,7 +92,7 @@ function renderBoxes(boxes, changeBox) {
   return boxRows;
 }
 
-const useEventListener = (eventName, handler, element = window) => {
+const useEventListener = (eventName, handler, element = document) => {
   const savedHandler = useRef();
 
   useEffect(() => {
@@ -119,12 +125,12 @@ function App() {
   };
 
   function handleKey(event) {
-    if (!word) {
+    if (!word || !inAlphabet(event.key)) {
       return;
     }
 
     const newBox = {
-      letter: event.key,
+      letter: event.key.toUpperCase(),
       colour: "unnused"
     }
 
