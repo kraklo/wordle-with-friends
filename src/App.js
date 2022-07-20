@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { dictionary } from './dictionary.js';
 
 const alphabet = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"];
-console.log(dictionary);
 
 function inAlphabet(character) {
   return alphabet.includes(character);
