@@ -16,19 +16,19 @@ function createBox() {
   };
 }
 
-function createBoxRow() {
+function createBoxRow(length) {
   const boxes = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < length; i++) {
     boxes.push(createBox());
   }
 
   return boxes;
 }
 
-function createAllBoxRows() {
+function createAllBoxRows(length) {
   const rows = [];
   for (let i = 0; i < 6; i++) {
-    rows.push(createBoxRow());
+    rows.push(createBoxRow(length));
   }
 
   return rows;
@@ -58,9 +58,7 @@ function displayWord(word, winCondition, loseCondition) {
     );
   } else if (word === '') {
     return "There is no word set"
-  } else if (word.length !== 5) {
-    return "Please set a five letter word"
-  } else if (!dictionary.length5.includes(word)) {
+  } else if (!dictionary[`length${word.length}`].includes(word)) {
     return `${word} is not a valid English word`;
   }
 }
@@ -87,6 +85,10 @@ function renderBoxRow(row, rowNum) {
 }
 
 function renderBoxes(boxes) {
+  if (!boxes) {
+    return;
+  }
+
   const boxRows = []
 
   boxes.forEach((boxRow, rowNum) => {
@@ -176,7 +178,7 @@ function getRowWord(row) {
 function App() {
   const [word, setWord] = useState('');
   const [settableState, setSettableState] = useState(true);
-  const [boxes, setBoxes] = useState(createAllBoxRows());
+  const [boxes, setBoxes] = useState(null);
   const [row, setRow] = useState(0);
   const [column, setColumn] = useState(0);
   const [winCondition, setWinCondition] = useState(false);
@@ -193,7 +195,8 @@ function App() {
 
   const handleSetWord = newWord => {
     setWord(newWord.toLowerCase());
-    if (newWord.length === 5 && dictionary.length5.includes(newWord) && settableState) {
+    if (dictionary[`length${newWord.length}`].includes(newWord) && settableState) {
+      setBoxes(createAllBoxRows(newWord.length));
       setSettableState(false);
     }
   }
@@ -207,10 +210,10 @@ function App() {
       if (event.key === "Enter") {
         handleSetWord(inputRef.current.value);
       }
-    } else if (event.key === "Enter" && column > 4) {
+    } else if (event.key === "Enter" && column > word.length - 1) {
       const guess = getRowWord(boxes[row]);
 
-      if (!dictionary.length5.includes(guess)) {
+      if (!dictionary[`length${word.length}`].includes(guess)) {
         return;
       }
 
@@ -223,7 +226,7 @@ function App() {
 
       newBoxes.forEach((box, i) => changeBox(box, row, i));
 
-      if (row >= 5) {
+      if (row > 6) {
         setLoseCondition(true);
       } else {
         setRow(row + 1);
@@ -239,7 +242,7 @@ function App() {
       changeBox(newBox, row, newColumn);
       setColumn(newColumn);
     } else {
-      if (!inAlphabet(event.key) || column > 4) {
+      if (!inAlphabet(event.key) || column > word.length - 1) {
         return;
       }
 
