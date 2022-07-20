@@ -127,6 +127,13 @@ function checkGuess(guess, word) {
   const guessFreq = {};
 
   wordArr.forEach(letter => wordFreq[letter] = wordFreq[letter] ? wordFreq[letter] + 1 : 1);
+  // this fixes some stupid bug where you can get a yellow and a green for the same letter
+  // if the green is after the yellow in the word
+  guessArr.forEach((letter, i) => {
+    if (letter === wordArr[i]) {
+      guessFreq[letter] = guessFreq[letter] ? guessFreq[letter] + 1 : 1
+    }
+  });
 
   guessArr.forEach((letter, i) => {
     if (letter === wordArr[i]) {
