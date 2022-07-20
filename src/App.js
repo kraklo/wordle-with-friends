@@ -46,14 +46,20 @@ function SetForm(props) {
   );
 }
 
-function displayWord(word, winCondition, loseCondition) {
+function displayWord(word, winCondition, loseCondition, handlePlayAgain) {
   if (winCondition) {
     return (
-      <>Correct! The word was <em>{word}</em>!</>
+      <>
+        Correct! The word was <em>{word}</em>!
+        <button onClick={() => handlePlayAgain()}>Play Again</button>
+      </>
     );
   } else if (loseCondition) {
     return (
-      <>Uh oh, you ran out of guesses! The word was <em>{word}</em>!</>
+      <>
+        Uh oh, you ran out of guesses! The word was <em>{word}</em>!
+        <button onClick={() => handlePlayAgain()}>Play Again</button>
+      </>
     );
   } else if (word === '') {
     return "There is no word set"
@@ -255,11 +261,21 @@ function App() {
     }
   }
 
+  const handlePlayAgain = () => {
+    setSettableState(true);
+    setBoxes(null);
+    setLoseCondition(false);
+    setWinCondition(false);
+    setColumn(0);
+    setRow(0);
+    setWord('');
+  };
+
   useEventListener("keydown", handleKey);
 
   return (
     <>
-      <p>{displayWord(word, winCondition, loseCondition)}</p>
+      <p>{displayWord(word, winCondition, loseCondition, handlePlayAgain)}</p>
       <SetForm
         settableState={settableState}
         inputRef={inputRef}
